@@ -1,0 +1,89 @@
+version: 2
+
+models:
+  - name: dim_date
+    columns:
+      - name: date_day
+        data_tests: [unique, not_null]
+
+  - name: dim_medicine
+    columns:
+      - name: medicine_id
+        data_tests: [unique, not_null]
+      - name: therapeutic_class
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['analgesic', 'antibiotic', 'cardiovascular', 'antidiabetic',
+                         'gastrointestinal', 'anthelmintic', 'respiratory', 'vitamin',
+                         'tb_program', 'supply', 'diagnostic']
+              config: {severity: warn}
+
+  - name: dim_municipality
+    columns:
+      - name: municipality
+        data_tests: [unique, not_null]
+
+  - name: dim_patient
+    columns:
+      - name: patient_key
+        data_tests: [unique, not_null]
+
+  - name: fct_stock_movements
+    description: Stock ledger — one row per quantity change of a batch. Grain is movement_id.
+    columns:
+      - name: movement_id
+        data_tests: [unique, not_null]
+      - name: movement_date
+        data_tests: [not_null]
+      - name: movement_type
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['opening', 'receipt', 'issue', 'return']}
+
+  - name: fct_medicine_daily_stock
+    description: Medicine × day stock position, zero-filled.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [medicine_id, date_day]
+    columns:
+      - name: closing_qty
+        description: Running balance. Must never go negative if the ledger is complete.
+        data_tests: [non_negative]
+
+  - name: fct_consultations
+    description: One row per outpatient visit, with standardized diagnosis and vitals flags.
+    columns:
+      - name: visit_id
+        data_tests: [unique, not_null]
+      - name: patient_key
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_patient'), field: patient_key}
+      - name: municipality
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_municipality'), field: municipality}
+
+  - name: fct_clinic_dispensing
+    columns:
+      - name: dispensing_item_id
+        data_tests: [unique, not_null]
+
+  - name: rpt_expiry_risk
+    columns:
+      - name: batch_id
+        data_tests: [unique, not_null]
+
+  - name: ml_medicine_demand_weekly
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [medicine_id, week_start]
+
+  - name: ml_disease_weekly
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [week_start, municipality, diagnosis_name]

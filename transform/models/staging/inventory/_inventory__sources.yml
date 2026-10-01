@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: inventory
+    description: >
+      Bronze snapshots of the IPHO Medicine Inventory app (Supabase `public` schema).
+      All columns are strings; lineage columns `_ingested_at`, `_run_id`, `_source` are
+      added at ingestion.
+    meta:
+      external_location: >-
+        read_parquet('{{ env_var("LAKE_PATH", "../data/lake") }}/bronze/inventory/{name}/*/*.parquet',
+        hive_partitioning = true, union_by_name = true)
+    tables:
+      - name: medicine
+      - name: batch
+      - name: distribution_event
+      - name: distribution
+      - name: returns
+      - name: restock_log

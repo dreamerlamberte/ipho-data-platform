@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: clinic
+    description: >
+      Bronze snapshots of the IPHO Outpatient Clinic app (Supabase `clinic` schema).
+      Direct identifiers were dropped and IDs pseudonymized at ingestion
+      (see ingestion/pii_policy.yml) — no PII exists from this layer on.
+    meta:
+      external_location: >-
+        read_parquet('{{ env_var("LAKE_PATH", "../data/lake") }}/bronze/clinic/{name}/*/*.parquet',
+        hive_partitioning = true, union_by_name = true)
+    tables:
+      - name: patients
+      - name: visits
+      - name: dispensing_records
+      - name: dispensing_items

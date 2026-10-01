@@ -1,0 +1,108 @@
+version: 2
+
+models:
+  - name: stg_inventory__medicines
+    description: Medicine/supply master list, typed. One row per medicine_id.
+    columns:
+      - name: medicine_id
+        data_tests: [unique, not_null]
+      - name: unit_price_php
+        data_tests: [non_negative]
+
+  - name: stg_inventory__batches
+    description: Physical lots received into the warehouse. Dates parsed from mixed TEXT formats.
+    columns:
+      - name: batch_id
+        data_tests: [unique, not_null]
+      - name: medicine_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('stg_inventory__medicines'), field: medicine_id}
+      - name: expiry_date
+        description: Null when never encoded upstream — surfaced as 'unknown expiry' in rpt_expiry_risk.
+        data_tests:
+          - not_null: {config: {severity: warn}}
+
+  - name: stg_inventory__distribution_events
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: event_date
+        description: Parsed from ISO or legacy MM/DD/YYYY text. Must always resolve.
+        data_tests: [not_null]
+      - name: distribution_category
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['Allocation', 'MDO', 'Request', 'OPD']}
+      - name: transaction_ref
+        data_tests: [unique]
+
+  - name: stg_inventory__distributions
+    columns:
+      - name: distribution_id
+        data_tests: [unique, not_null]
+      - name: batch_id
+        data_tests:
+          - relationships:
+              arguments: {to: ref('stg_inventory__batches'), field: batch_id}
+      - name: event_id
+        data_tests:
+          - relationships:
+              arguments: {to: ref('stg_inventory__distribution_events'), field: event_id}
+      - name: qty_issued
+        data_tests: [non_negative]
+
+  - name: stg_inventory__returns
+    columns:
+      - name: return_id
+        data_tests: [unique, not_null]
+
+  - name: stg_inventory__restocks
+    columns:
+      - name: restock_id
+        data_tests: [unique, not_null]
+      - name: batch_id
+        data_tests:
+          - relationships:
+              arguments: {to: ref('stg_inventory__batches'), field: batch_id}
+
+  - name: stg_clinic__patients
+    description: Pseudonymized patients. patient_key is a keyed HMAC of the source patient_id.
+    columns:
+      - name: patient_key
+        data_tests: [unique, not_null]
+      - name: sex
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['Male', 'Female']}
+
+  - name: stg_clinic__visits
+    columns:
+      - name: visit_id
+        data_tests: [unique, not_null]
+      - name: patient_key
+        data_tests:
+          - relationships:
+              arguments: {to: ref('stg_clinic__patients'), field: patient_key}
+
+  - name: stg_clinic__dispensing_records
+    columns:
+      - name: dispensing_id
+        data_tests: [unique, not_null]
+      - name: visit_id
+        data_tests:
+          - relationships:
+              arguments: {to: ref('stg_clinic__visits'), field: visit_id}
+
+  - name: stg_clinic__dispensing_items
+    columns:
+      - name: dispensing_item_id
+        data_tests: [unique, not_null]
+      - name: medicine_id
+        description: Snapshot reference into the inventory master list (no FK in the source app).
+        data_tests:
+          - relationships:
+              arguments: {to: ref('stg_inventory__medicines'), field: medicine_id}
+      - name: qty_dispensed
+        data_tests: [non_negative]

@@ -1,0 +1,23 @@
+version: 2
+
+seeds:
+  - name: diagnosis_map
+    description: >
+      Maps free-text clinic diagnoses (lower-cased) to a canonical diagnosis,
+      ICD-10 code and disease group. Curated reference data — extend it when
+      assert_diagnosis_coverage warns.
+    config:
+      column_types: {is_notifiable: boolean}
+    columns:
+      - name: diagnosis_text
+        data_tests: [unique, not_null]
+  - name: medicine_classification
+    columns:
+      - name: medicine_id
+        data_tests: [unique, not_null]
+  - name: municipalities
+    config:
+      column_types: {is_capital: boolean}
+    columns:
+      - name: municipality
+        data_tests: [unique, not_null]

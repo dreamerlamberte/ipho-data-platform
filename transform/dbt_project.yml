@@ -1,0 +1,35 @@
+name: ipho
+version: "0.1.0"
+config-version: 2
+profile: ipho
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # Batches with no restock record are treated as opening stock on this date —
+  # the day the Inventory app's ledger starts.
+  inventory_opening_date: "2024-01-01"
+  # Analytics horizon for zero-filled grids (daily stock, weekly series).
+  analysis_end_date: "2026-09-30"
+
+models:
+  ipho:
+    +persist_docs: {relation: true, columns: true}
+    staging:
+      +schema: silver
+      +materialized: view
+    intermediate:
+      +schema: silver
+      +materialized: view
+    marts:
+      +schema: gold
+      +materialized: table
+
+seeds:
+  ipho:
+    +schema: reference

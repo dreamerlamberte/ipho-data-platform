@@ -1,0 +1,61 @@
+# Full local stack. Mirrors production topology: an operational Postgres
+# (stand-in for the IPHO Supabase project) is extracted into the lake, then
+# modelled by dbt.
+#
+#   docker compose up --build        # seed source → ingest → dbt build
+#   docker compose run --rm docs     # dbt docs on http://localhost:8080
+
+services:
+  source-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ipho
+      POSTGRES_PASSWORD: ipho
+      POSTGRES_DB: ipho_source
+    ports: ["5433:5432"]
+    volumes:
+      - ./sources/postgres/init:/docker-entrypoint-initdb.d:ro
+      - source-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ipho -d ipho_source"]
+      interval: 3s
+      retries: 20
+
+  seed-source:
+    build: .
+    depends_on:
+      source-db: {condition: service_healthy}
+    environment:
+      SOURCE_PG_DSN: postgresql://ipho:ipho@source-db:5432/ipho_source
+      SOURCE_DIR: /data/source
+    volumes: [lake:/data]
+    command: >
+      sh -c "python -m ipho_synth.generate --out /data/source &&
+             python scripts/load_postgres.py"
+
+  pipeline:
+    build: .
+    depends_on:
+      seed-source: {condition: service_completed_successfully}
+    environment:
+      SOURCE_PG_DSN: postgresql://ipho:ipho@source-db:5432/ipho_source
+      PII_HASH_SALT: ${PII_HASH_SALT:-compose-dev-salt}
+    volumes: [lake:/data]
+    command: >
+      sh -c "python -m ipho_ingest.extract --source postgres &&
+             mkdir -p /data/warehouse &&
+             dbt build --project-dir transform --profiles-dir transform"
+
+  docs:
+    build: .
+    profiles: ["docs"]
+    volumes: [lake:/data]
+    ports: ["8080:8080"]
+    command: >
+      sh -c "dbt docs generate --project-dir transform --profiles-dir transform &&
+             dbt docs serve --project-dir transform --profiles-dir transform
+             --host 0.0.0.0 --port 8080"
+
+volumes:
+  source-db:
+  lake:

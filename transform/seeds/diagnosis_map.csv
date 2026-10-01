@@ -1,0 +1,54 @@
+diagnosis_text,diagnosis_name,icd10_code,disease_group,is_notifiable
+acute upper respiratory infection,Acute upper respiratory infection,J06.9,respiratory,false
+acute urti,Acute upper respiratory infection,J06.9,respiratory,false
+colds,Acute upper respiratory infection,J06.9,respiratory,false
+upper respiratory tract infection,Acute upper respiratory infection,J06.9,respiratory,false
+uri,Acute upper respiratory infection,J06.9,respiratory,false
+urti,Acute upper respiratory infection,J06.9,respiratory,false
+essential hypertension,Essential hypertension,I10,non-communicable,false
+high blood,Essential hypertension,I10,non-communicable,false
+hpn,Essential hypertension,I10,non-communicable,false
+htn,Essential hypertension,I10,non-communicable,false
+hypertension,Essential hypertension,I10,non-communicable,false
+hypertension stage 1,Essential hypertension,I10,non-communicable,false
+diabetes,Type 2 diabetes mellitus,E11.9,non-communicable,false
+dm type 2,Type 2 diabetes mellitus,E11.9,non-communicable,false
+dm2,Type 2 diabetes mellitus,E11.9,non-communicable,false
+t2dm,Type 2 diabetes mellitus,E11.9,non-communicable,false
+type 2 diabetes mellitus,Type 2 diabetes mellitus,E11.9,non-communicable,false
+acute gastro,Acute gastroenteritis,A09,enteric,false
+acute gastroenteritis,Acute gastroenteritis,A09,enteric,false
+age,Acute gastroenteritis,A09,enteric,false
+diarrhea,Acute gastroenteritis,A09,enteric,false
+lbm,Acute gastroenteritis,A09,enteric,false
+dengue,Dengue fever,A90,vector-borne,true
+dengue fever,Dengue fever,A90,vector-borne,true
+df,Dengue fever,A90,vector-borne,true
+suspected dengue,Dengue fever,A90,vector-borne,true
+urinary tract infection,Urinary tract infection,N39.0,infectious,false
+uti,Urinary tract infection,N39.0,infectious,false
+cap,Community-acquired pneumonia,J18.9,respiratory,false
+cap-low risk,Community-acquired pneumonia,J18.9,respiratory,false
+community-acquired pneumonia,Community-acquired pneumonia,J18.9,respiratory,false
+pneumonia,Community-acquired pneumonia,J18.9,respiratory,false
+asthma,Bronchial asthma,J45.9,non-communicable,false
+ba,Bronchial asthma,J45.9,non-communicable,false
+bronchial asthma,Bronchial asthma,J45.9,non-communicable,false
+bronchial asthma in exacerbation,Bronchial asthma,J45.9,non-communicable,false
+ptb,Pulmonary tuberculosis,A15.0,infectious,true
+pulmonary tb,Pulmonary tuberculosis,A15.0,infectious,true
+pulmonary tuberculosis,Pulmonary tuberculosis,A15.0,infectious,true
+tb,Pulmonary tuberculosis,A15.0,infectious,true
+boil,Skin and soft tissue infection,L08.9,infectious,false
+cellulitis,Skin and soft tissue infection,L08.9,infectious,false
+infected wound,Skin and soft tissue infection,L08.9,infectious,false
+skin and soft tissue infection,Skin and soft tissue infection,L08.9,infectious,false
+wound infection,Skin and soft tissue infection,L08.9,infectious,false
+anemia,Iron-deficiency anaemia,D50.9,nutritional,false
+"anemia, mild",Iron-deficiency anaemia,D50.9,nutritional,false
+ida,Iron-deficiency anaemia,D50.9,nutritional,false
+iron-deficiency anaemia,Iron-deficiency anaemia,D50.9,nutritional,false
+helminthiasis,Intestinal helminthiasis,B82.0,infectious,false
+intestinal helminthiasis,Intestinal helminthiasis,B82.0,infectious,false
+parasitism,Intestinal helminthiasis,B82.0,infectious,false
+worm infestation,Intestinal helminthiasis,B82.0,infectious,false

@@ -1,0 +1,7 @@
+ipho:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('WAREHOUSE_PATH', '../data/warehouse/ipho.duckdb') }}"
+      threads: 4

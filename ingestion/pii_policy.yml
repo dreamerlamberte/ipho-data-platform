@@ -1,0 +1,46 @@
+# PII policy applied at ingestion time, BEFORE anything is written to the lake.
+# Raw identifiers never land in bronze, so nothing downstream (dbt, BI, ML, LLM
+# prompts) can leak them. Aligned with the Philippine Data Privacy Act (RA 10173)
+# principle of proportionality: keep only what analysis needs.
+#
+# Actions:
+#   hash        keyed HMAC-SHA256 (salt from PII_HASH_SALT) → stable pseudonym, joinable
+#   drop        column removed entirely
+#   year_only   ISO date → year (birthdate → birth year; age bands derived in dbt)
+#   presence    value → "true"/"false" (e.g. "has PhilHealth number")
+#
+# Columns not listed are passed through unchanged. Tables not listed under
+# `tables` are not ingested at all (allow-list, not block-list).
+
+tables:
+  inventory:
+    medicine: {}
+    batch: {}
+    distribution_event: {}
+    distribution: {}
+    returns:
+      returned_by: hash
+    restock_log:
+      restocked_by: hash
+  clinic:
+    patients:
+      patient_id: hash
+      last_name: drop
+      first_name: drop
+      middle_name: drop
+      suffix: drop
+      address: drop
+      contact_number: drop
+      birthdate: year_only
+      philhealth_no: presence
+      created_by: hash
+    visits:
+      patient_id: hash
+      attending_staff: hash
+      created_by: hash
+      notes: drop          # free text can contain names; excluded until an NER scrubber exists
+    dispensing_records:
+      patient_id: hash
+      dispensed_by: hash
+      notes: drop
+    dispensing_items: {}
