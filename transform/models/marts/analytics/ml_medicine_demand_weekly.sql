@@ -11,6 +11,8 @@ with weekly as (
         bool_or(s.closing_qty <= 0)     as had_stockout
     from {{ ref('fct_medicine_daily_stock') }} s
     join {{ ref('dim_date') }} d using (date_day)
+    -- complete ISO weeks only, so the latest week isn't an artificially low target
+    where d.week_start + interval 6 day <= cast('{{ var("analysis_end_date") }}' as date)
     group by 1, 2
 )
 

@@ -2,8 +2,9 @@
 # (stand-in for the IPHO Supabase project) is extracted into the lake, then
 # modelled by dbt.
 #
-#   docker compose up --build        # seed source → ingest → dbt build
-#   docker compose run --rm docs     # dbt docs on http://localhost:8080
+#   docker compose up --build        # seed source → ingest → dbt build → API + web console
+#                                    # console on http://localhost:3900
+#   docker compose --profile docs up docs   # dbt docs on http://localhost:8080
 
 services:
   source-db:
@@ -45,6 +46,33 @@ services:
       sh -c "python -m ipho_ingest.extract --source postgres &&
              mkdir -p /data/warehouse &&
              dbt build --project-dir transform --profiles-dir transform"
+
+  api:
+    build: .
+    depends_on:
+      pipeline: {condition: service_completed_successfully}
+    environment:
+      SOURCE_PG_DSN: postgresql://ipho:ipho@source-db:5432/ipho_source
+      PII_HASH_SALT: ${PII_HASH_SALT:-compose-dev-salt}
+      INGEST_SOURCE: postgres
+      SOURCE_DIR: /data/source
+      # Local demo only: lets the console re-run pipeline stages.
+      ENABLE_PIPELINE_CONTROL: "true"
+    volumes: [lake:/data]
+    ports: ["8000:8000"]
+    command: uvicorn ipho_api.main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 5s
+      retries: 20
+
+  web:
+    build:
+      context: ./web
+      args: {API_URL: "http://api:8000"}
+    depends_on:
+      api: {condition: service_healthy}
+    ports: ["3900:3900"]
 
   docs:
     build: .

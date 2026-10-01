@@ -18,7 +18,7 @@ modelled, tested, documented warehouse that powers dashboards and AI features.
                                                      silver  typed, parsed, de-duplicated
                                                         │
                                                         ▼
-                                                     gold    star schema + ML feature tables ──► BI · forecasting · anomaly detection · NL-to-SQL
+                                                     gold    star schema + ML feature tables ──► FastAPI ──► Next.js console
 ```
 
 ## Quickstart
@@ -31,11 +31,36 @@ make pipeline   # generate synthetic sources → ingest to bronze → dbt build 
 make docs       # dbt docs + lineage graph on http://localhost:8080
 ```
 
-Or run the full containerized stack, with a real Postgres playing the role of the Supabase source:
+Then open the web console (two terminals):
+
+```bash
+make api        # FastAPI on :8000 — read-only API over the gold layer
+make web        # Next.js console on http://localhost:3900
+```
+
+Or run the full containerized stack, with a real Postgres playing the role of the Supabase source;
+the console comes up on http://localhost:3900:
 
 ```bash
 docker compose up --build
 ```
+
+## Web console
+
+A self-hosted web app, built from open-source parts only, with no hosted BI service:
+
+| Page | What it shows |
+|---|---|
+| **Overview** | Stock value, expired stock still on hand, 30-day consultations vs the prior 30 days, stockouts, weekly visit trend, top diagnoses |
+| **Inventory** | Per-medicine stock ledger, weeks of cover, weekly issues with stockout weeks flagged, and an expiry worklist of batches to redistribute before they expire |
+| **Surveillance** | Weekly cases per diagnosis and municipality with a **CDC EARS-C2 alert threshold**, a municipality × month heatmap, and flagged weeks |
+| **Pipeline & quality** | Run the pipeline stages from the browser with a live log, dbt test results, ingest-run history and warehouse contents |
+| **SQL explorer** | Ad-hoc DuckDB SQL over gold and reference tables. Read-only, no file or network access, row-capped |
+
+`api/` is FastAPI. Each request opens its own read-only DuckDB connection, so dbt can rebuild
+the warehouse while the API is serving. `web/` is Next.js 14 + Tailwind + Recharts and proxies
+`/api/*` to the API, so the API never has to be exposed publicly. Pipeline control from the browser
+is off by default (`ENABLE_PIPELINE_CONTROL`) and only turned on for local use.
 
 ## What's inside
 
@@ -47,7 +72,7 @@ docker compose up --build
 | Silver | `transform/models/staging`, `intermediate` | Typing, multi-format date parsing, latest-snapshot selection, the rebuilt **stock ledger**, recipient municipality recovered from free-text event names, and diagnoses mapped to ICD-10 through a curated seed. |
 | Gold | `transform/models/marts` | Star schema (`dim_date`, `dim_medicine`, `dim_municipality`, `dim_patient`, `fct_stock_movements`, `fct_medicine_daily_stock`, `fct_consultations`, `fct_clinic_dispensing`), an expiry-risk worklist, and leakage-safe ML feature tables (`ml_medicine_demand_weekly`, `ml_disease_weekly`). |
 | Quality | `transform/tests`, `*.yml` | 70 data tests: keys, referential integrity, accepted values, non-negative balances, and a **ledger reconciliation** test proving the rebuilt ledger matches the app's trigger-maintained balances for every batch. Compliance findings (issuing from expired batches, unmapped diagnoses) *warn* instead of failing the build. |
-| CI | `.github/workflows/ci.yml` | Lint, unit tests, full end-to-end pipeline, dbt docs artifact, Docker image build and a Compose run. |
+| CI | `.github/workflows/ci.yml` | Lint, unit + API tests, full end-to-end pipeline, dbt docs artifact, web lint + build, Docker image builds, and a Compose run smoke-tested through the web proxy. |
 
 ## Design decisions
 

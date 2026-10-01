@@ -1,0 +1,9 @@
+.venv
+data
+web
+**/__pycache__
+transform/target
+transform/logs
+.git
+.github
+.claude

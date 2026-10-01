@@ -3,9 +3,10 @@
     anomaly detection such as EARS-C2 / CUSUM. -#}
 
 with weeks as (
+    -- complete ISO weeks only: a partial final week would read as a sudden drop
     select distinct week_start from {{ ref('dim_date') }}
-    where date_day between cast('{{ var("inventory_opening_date") }}' as date)
-                       and cast('{{ var("analysis_end_date") }}' as date)
+    where week_start >= cast('{{ var("inventory_opening_date") }}' as date)
+      and week_start + interval 6 day <= cast('{{ var("analysis_end_date") }}' as date)
 ),
 grid as (
     select w.week_start, m.municipality, dx.diagnosis_name, dx.disease_group, dx.is_notifiable

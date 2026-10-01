@@ -7,6 +7,10 @@ Synthetic sources mirroring the production schemas · PII-safe ingestion to bron
 dbt silver/gold star schema · 70 data tests including ledger reconciliation ·
 Docker Compose stack with a Postgres source replica · CI.
 
+## ✅ Phase 1b — Web console
+FastAPI read-only API + Next.js console (overview, inventory, EARS-C2 surveillance,
+pipeline control & data quality, sandboxed SQL explorer), containerized and in Compose.
+
 ## Phase 2 — Orchestration & observability
 - Dagster: software-defined assets for ingest + `dagster-dbt`, daily schedule, freshness
   policies, asset checks wired to the dbt tests.
