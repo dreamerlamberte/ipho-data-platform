@@ -10,8 +10,8 @@ jobs:
     env:
       PII_HASH_SALT: ci-only-salt
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
         with: {enable-cache: true}
       - run: uv sync --frozen
       - name: Lint
@@ -25,7 +25,7 @@ jobs:
         env:
           LAKE_PATH: ${{ github.workspace }}/data/lake
           WAREHOUSE_PATH: ${{ github.workspace }}/data/warehouse/ipho.duckdb
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dbt-docs
           path: |
@@ -37,8 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults: {run: {working-directory: web}}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: {node-version: 22, cache: npm, cache-dependency-path: web/package-lock.json}
       - run: npm ci
       - run: npm run lint
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [pipeline, web]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build pipeline image
         run: docker build -t ipho-data-platform:${{ github.sha }} .
       - name: Run full compose stack (Postgres source → lake → dbt)

@@ -1,5 +1,7 @@
 # IPHO Data Platform
 
+[![ci](https://github.com/dreamerlamberte/ipho-data-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/dreamerlamberte/ipho-data-platform/actions/workflows/ci.yml)
+
 A centralized, privacy-first data platform for the **Integrated Provincial Health Office (IPHO)
 of Zamboanga Sibugay, Philippines**. It consolidates the IPHO's operational systems (medicine
 inventory and outpatient clinic, with scorecard and disease surveillance next) into one
